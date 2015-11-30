@@ -3,18 +3,11 @@ This plugin intents to make life easier for people running Ruckus Wireless infra
 
 ## Features
   - List clients / searches clients for mac address, ip address, hostname or SSID
-  - dunno
+  - Shows details on WiFi Clients
 
 ### Usage
 ```
-.clients
-.clients for X
+clients for <pattern> - searches for WiFi clients whos SSID, AP-Name, IP, IPv6 or MAC starts with pattern
+clients - retrieves all WiFi clients
+client <mac> - retrieves details for WiFi client with <mac> Address
 ```
-where X stands for any mac, ip, hostname or ssid starting with X
-### Installation
-INTRODUCE HUBOT AND THIS PLUGIN
-```sh
-$ cp config.sample.json config.json
-$ vim config.json
-```
-and enter your credentials for the ruckus zonedirector api.
