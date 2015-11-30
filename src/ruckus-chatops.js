@@ -89,10 +89,10 @@ var getClient = function(mac, cb) {
   });
 }
 var listClients = function(r, clients, cb) {
-  r.send("Found " + clients.length + " Clients:\n" + "SSID\t\t| AP Name\t| Mac\t\t| Hostname\t\t | IPv4\t\t| IPv6");
+  r.send("Found " + clients.length + " Clients:\n" + "Mac | SSID | AP Name | Hostname | IPv4 | IPv6");
   buf = "";
   clients.forEach(function(d) {
-    buf += d.ssid + "\t| " + d.apName + "\t| "+ d.mac + " | " + d.hostName + "\t| " + d.ipAddress + "\t| " + d.ipv6Address + "\n";
+    buf += d.mac + " | " + d.ssid + " | " + d.apName + " | " + d.hostName + " | " + d.ipAddress + " | " + d.ipv6Address + "\n";
   });
   r.send(buf);
   if(typeof(cb) === 'function') {
@@ -142,13 +142,13 @@ module.exports = function(robot) {
     getClient(r.match[1], function(c) {
       var buf = "";
       buf += "Client " + c.mac + "\n";
-      buf += "\tIPv4:\t\t" + c.ipAddress + "\n";
-      buf += "\tIPv6:\t\t" + c.ipv6Address + "\n";
-      buf += "\tSSID:\t\t" + c.ssid + "\n";
-      buf += "\tAP Name:\t" + c.apName + "\n";
-      buf += "\tHostname:\t" + c.hostName + "\n";
-      buf += "\tRadio Mode:\t" + c.radioMode + "\n";
-      buf += "\tOS Type:\t" + c.osType + "\n";
+      buf += "  IPv4:       " + c.ipAddress + "\n";
+      buf += "  IPv6:       " + c.ipv6Address + "\n";
+      buf += "  SSID:       " + c.ssid + "\n";
+      buf += "  AP Name:    " + c.apName + "\n";
+      buf += "  Hostname:   " + c.hostName + "\n";
+      buf += "  Radio Mode: " + c.radioMode + "\n";
+      buf += "  OS Type:    " + c.osType + "\n";
       r.send(buf);
     });
   })
