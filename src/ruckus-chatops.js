@@ -7,7 +7,7 @@
 //   RUCKUS_PASSWORD - hubots password
 //
 // Commands:
-//   clients for <pattern> - searches for WiFi clients whos SSID, AP-Name, IP, IPv6 or MAC starts with pattern
+//   clients for <pattern> - searches for WiFi clients whos Hostname, SSID, AP-Name, IP, IPv6 or MAC starts with pattern
 //   clients - retrieves all WiFi clients
 //   client <mac> - retrieves details for WiFi client with <mac> Address
 //
@@ -51,30 +51,33 @@ var req = {
   }
 }
 
-var loggedin = false;
+var validLogin = true;
 
 var getAllClients = function(cb) {
-  req.get('aps', function(err, res, body) {
+  enshureLoggedin(function(l) {
+    if(!l) return cb([]);
+    req.get('aps', function(err, res, body) {
 
-    var calls = [];
-    body.list.forEach(function(d) {
-      calls.push(function(cb) {
-        req.get('aps/'+d.mac+'/operational/client', function(err, res, body) {
-          body.list.forEach(function(c) {
-            c.apName = d.name;
+      var calls = [];
+      body.list.forEach(function(d) {
+        calls.push(function(cb) {
+          req.get('aps/'+d.mac+'/operational/client', function(err, res, body) {
+            body.list.forEach(function(c) {
+              c.apName = d.name;
+            });
+            cb(null, body.list);
           });
-          cb(null, body.list);
         });
       });
-    });
-    async.parallel(calls, function(err, results) {
-      var clients = [];
-      results.forEach(function(d) {
-        clients.extend(d);
+      async.parallel(calls, function(err, results) {
+        var clients = [];
+        results.forEach(function(d) {
+          clients.extend(d);
+        });
+        cb(clients);
       });
-      cb(clients);
-    });
-  })
+    })
+  });
 }
 
 var getClient = function(mac, cb) {
@@ -99,30 +102,45 @@ var listClients = function(r, clients, cb) {
     cb(null);
   }
 }
-module.exports = function(robot) {
+
+var login = function(cb) {
   req.post('session', {
     username: process.env.RUCKUS_USERNAME,
     password: process.env.RUCKUS_PASSWORD,
     apiVersions: ["1", "2", "3"]
   }, function(err, res, body) {
-      if(res.statusCode === 200) {
-        loggedin = true;
-        robot.messageRoom("#atca", "Ruckus API: Logged In");
+      if(!res.statusCode === 200) {
+        console.log("RUCKUS API: Invalid Login!");
+        validLogin = false;
+        cb(false);
       } else {
-        robot.messageRoom("#atca", "Ruckus API: Login failed");
+        cb(true);
       }
   });
-  robot.hear(/^clients for (.*)/i, function(r) {
-    if(!loggedin) {
-        r.send("Not loggedin");
-        return;
+}
+
+var enshureLoggedin = function(cb) {
+  if(!validLogin) return;
+  req.get('session', function(err, res, body) {
+    if(res.statusCode === 401) {
+      login(cb);
+    } else {
+      cb(true);
     }
+  })
+}
+module.exports = function(robot) {
+  if(!process.env.RUCKUS_USERNAME || !process.env.RUCKUS_PASSWORD) {
+    console.log("Ruckus API: Please set ruckus username and password");
+  }
+
+  robot.hear(/^clients for (.*)/i, function(r) {
     var query = r.match[1];
     getAllClients(function(clients) {
       var buf = [];
-      // Search for SSID, AP-Name, IP, IPv6 or MAC
       clients.forEach(function(c) {
         if(c.ssid.startsWith(query) ||
+        (c.hostName && c.hostName.startsWith(query)) ||
         c.mac.startsWith(query) ||
         c.ipAddress.startsWith(query) ||
         (c.ipv6Address && c.ipv6Address.startsWith(query)) ||
@@ -135,10 +153,6 @@ module.exports = function(robot) {
     })
   });
   robot.hear(/^client ([a-z0-9]{2}(:[a-z0-9]{2}){5})/i, function(r) {
-    if(!loggedin) {
-        r.send("Not loggedin");
-        return;
-    }
     getClient(r.match[1], function(c) {
       var buf = "";
       buf += "Client " + c.mac + "\n";
@@ -153,10 +167,6 @@ module.exports = function(robot) {
     });
   })
   robot.hear(/^clients$/i, function(r) {
-    if(!loggedin) {
-        r.send("Not loggedin");
-        return;
-    }
     getAllClients(function(clients) {
       listClients(r, clients);
     });
