@@ -103,6 +103,21 @@ var listClients = function(r, clients, cb) {
   }
 }
 
+var filterClients = function(query, clients, cb) {
+  var buf = [];
+  clients.forEach(function(c) {
+    if(c.ssid.startsWith(query) ||
+    (c.hostName && c.hostName.startsWith(query)) ||
+    c.mac.startsWith(query) ||
+    c.ipAddress.startsWith(query) ||
+    (c.ipv6Address && c.ipv6Address.startsWith(query)) ||
+    c.apName.startsWith(query)) {
+      buf.push(c);
+    }
+  });
+  cb(buf);
+}
+
 var login = function(cb) {
   req.post('session', {
     username: process.env.RUCKUS_USERNAME,
@@ -137,18 +152,9 @@ module.exports = function(robot) {
   robot.hear(/^clients for (.*)/i, function(r) {
     var query = r.match[1];
     getAllClients(function(clients) {
-      var buf = [];
-      clients.forEach(function(c) {
-        if(c.ssid.startsWith(query) ||
-        (c.hostName && c.hostName.startsWith(query)) ||
-        c.mac.startsWith(query) ||
-        c.ipAddress.startsWith(query) ||
-        (c.ipv6Address && c.ipv6Address.startsWith(query)) ||
-        c.apName.startsWith(query)) {
-          buf.push(c);
-        }
+      filterClients(query, clients, function(fClients) {
+        listClients(r, fClients);
       });
-      listClients(r, buf);
 
     })
   });
@@ -170,5 +176,19 @@ module.exports = function(robot) {
     getAllClients(function(clients) {
       listClients(r, clients);
     });
-  })
+  });
+  robot.hear(/^clients count$/i, function(r) {
+    getAllClients(function(clients) {
+      r.send("Derzeit " + clients.length + " clients verbunden");
+    });
+  });
+  robot.hear(/^clients count (.*)/i, function(r) {
+    var query = r.match[1];
+    getAllClients(function(clients) {
+      filterClients(query, clients, function(fClients) {
+          r.send("Derzeit " + fClients.length + " clients verbunden");
+      })
+
+    });
+  });
 }

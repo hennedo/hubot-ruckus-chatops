@@ -11,4 +11,6 @@ You have to have set the following Environment variables: RUCKUS_USERNAME, RUCKU
 clients for <pattern> - searches for WiFi clients whos Hostname, SSID, AP-Name, IP, IPv6 or MAC starts with pattern
 clients - retrieves all WiFi clients
 client <mac> - retrieves details for WiFi client with <mac> Address
+clients count - counts all connected clients
+clients count <pattern> - counts all matching clients
 ```

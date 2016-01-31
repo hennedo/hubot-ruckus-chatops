@@ -1,7 +1,7 @@
 {
   "name": "hubot-ruckus-chatops",
   "description": "Search for WLAN Clients connected to your Ruckus Zonedirector with hubot",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "author": "henne <henne@drunkenrecords.de>",
   "license": "MIT",
   "keywords": "hubot, zonedirector, wlan, clients, search",
