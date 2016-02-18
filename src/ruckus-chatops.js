@@ -52,6 +52,14 @@ var req = {
 }
 
 var validLogin = true;
+var getAllAps = function(cb) {
+  enshureLoggedin(function(l) {
+    if(!l) return cb([]);
+    req.get('aps', function(err, res, body) {
+      cb(body.list);
+    });
+  });
+};
 
 var getAllClients = function(cb) {
   enshureLoggedin(function(l) {
@@ -93,7 +101,7 @@ var getClient = function(mac, cb) {
 }
 var listClients = function(r, clients, cb) {
   r.send("Found " + clients.length + " Clients:\n" + "Mac | SSID | AP Name | Hostname | IPv4 | IPv6");
-  buf = "";
+  var buf = "";
   clients.forEach(function(d) {
     buf += d.mac + " | " + d.ssid + " | " + d.apName + " | " + d.hostName + " | " + d.ipAddress + " | " + d.ipv6Address + "\n";
   });
@@ -102,6 +110,15 @@ var listClients = function(r, clients, cb) {
     cb(null);
   }
 }
+
+var listAps = function(r, aps, cb) {
+  r.send("Found " + aps.length + " Aps:");
+  var buf = "";
+  aps.forEach(function(d) {
+    buf += d.name + " ";
+  });
+  r.send(buf);
+};
 
 var filterClients = function(query, clients, cb) {
   var buf = [];
@@ -137,6 +154,10 @@ var login = function(cb) {
 var enshureLoggedin = function(cb) {
   if(!validLogin) return;
   req.get('session', function(err, res, body) {
+    if(err) {
+	validLogin = false;
+	return console.log(err);
+    }
     if(res.statusCode === 401) {
       login(cb);
     } else {
@@ -189,6 +210,11 @@ module.exports = function(robot) {
           r.send("Derzeit " + fClients.length + " clients verbunden");
       })
 
+    });
+  });
+  robot.hear(/^aps$/i, function(r) {
+    getAllAps(function(aps) {
+      listAps(r, aps);
     });
   });
 }

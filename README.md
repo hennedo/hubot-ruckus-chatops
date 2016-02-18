@@ -13,4 +13,5 @@ clients - retrieves all WiFi clients
 client <mac> - retrieves details for WiFi client with <mac> Address
 clients count - counts all connected clients
 clients count <pattern> - counts all matching clients
+aps - retrieves all ap names
 ```
