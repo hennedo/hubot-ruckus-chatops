@@ -56,6 +56,11 @@ var getAllAps = function(cb) {
   enshureLoggedin(function(l) {
     if(!l) return cb([]);
     req.get('aps', function(err, res, body) {
+      if(!body.list) {
+        console.log(err, body);
+        cb([]);
+        return;
+      }
       cb(body.list);
     });
   });
@@ -67,6 +72,11 @@ var getAllClients = function(cb) {
     req.get('aps', function(err, res, body) {
 
       var calls = [];
+      if(!body.list) {
+        console.log(err, body);
+        cb([]);
+        return;
+      }
       body.list.forEach(function(d) {
         calls.push(function(cb) {
           req.get('aps/'+d.mac+'/operational/client', function(err, res, body) {
