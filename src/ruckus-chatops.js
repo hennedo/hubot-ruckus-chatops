@@ -133,12 +133,14 @@ var listAps = function(r, aps, cb) {
 var filterClients = function(query, clients, cb) {
   var buf = [];
   clients.forEach(function(c) {
-    if(c.ssid.startsWith(query) ||
-    (c.hostName && c.hostName.startsWith(query)) ||
-    c.mac.startsWith(query) ||
-    c.ipAddress.startsWith(query) ||
-    (c.ipv6Address && c.ipv6Address.startsWith(query)) ||
-    c.apName.startsWith(query)) {
+    if(
+      (c.ssid && c.ssid.startsWith(query)) ||
+      (c.hostName && c.hostName.startsWith(query)) ||
+      (c.mac && c.mac.startsWith(query)) ||
+      (c.ipAddress && c.ipAddress.startsWith(query)) ||
+      (c.ipv6Address && c.ipv6Address.startsWith(query)) ||
+      (c.apName && c.apName.startsWith(query))
+    ) {
       buf.push(c);
     }
   });

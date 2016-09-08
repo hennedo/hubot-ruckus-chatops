@@ -1,5 +1,6 @@
 # HUBOT Ruckus Chatops Plugin
-This plugin intents to make life easier for people running Ruckus Wireless infrastructure.
+This plugin intents to make life easier for people running Ruckus Wireless infrastructure.  
+Lets IRC users interact with SmartZone API
 
 ## Features
   - List clients / searches clients for mac address, ip address, hostname or SSID
